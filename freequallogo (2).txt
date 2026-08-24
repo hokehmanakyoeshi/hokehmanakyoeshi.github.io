@@ -1,0 +1,10 @@
+<svg viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- စက်ဝိုင်း အပြည့် (Radius 300) -->
+  <circle cx="300" cy="300" r="300" fill="#FBC013" />
+  
+  <!-- ပိုမို ထူပြီး ကြီးမားသွားသော ညီမျှခြင်း သင်္ကေတ -->
+  <g fill="none" stroke="#000000" stroke-width="100" stroke-linecap="round">
+    <path d="M 140 210 Q 300 260 460 210" />
+    <path d="M 140 390 Q 300 440 460 390" />
+  </g>
+</svg>
