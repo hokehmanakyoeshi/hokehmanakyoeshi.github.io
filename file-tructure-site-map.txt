@@ -1,0 +1,53 @@
+ဒီ File Structure (Multi-level Index + Hybrid Chunks) ပေါ်မှာ အခြေခံပြီး တကယ့် လက်တွေ့ Static Web Application တစ်ခု အောင်မြင်စွာ လည်ပတ်နိုင်ဖို့ **ဖိုင်တစ်ခုချင်းစီမှာ ပါရှိရမယ့် ဇာတ်ကောင်၊ လုပ်ဆောင်ချက် (Functions) နဲ့ စနစ်တွေ**ကို အသေးစိတ် ရှင်းပြပေးပါမယ် -
+### ၁. index.html (ပင်မ UI နှင့် Search Interface)
+User မြင်ရမယ့် မျက်နှာပြင်ဖြစ်ပြီး ရှာဖွေရေး ဘားတန်းနဲ့ ရလဒ်ပြမယ့် နေရာတွေ ပါဝင်ပါမယ်။
+ * **Search Input Field (<input>):**
+   * Username စတင်ရိုက်ထည့်မယ့် နေရာ။
+   * input သို့မဟုတ် keyup Event ကို နားထောင်နေဖို့ (Listen လုပ်နေဖို့) လိုပါတယ်။
+ * **Autocomplete Dropdown Box (<div> သို့မဟုတ် <ul>):**
+   * User ရိုက်လိုက်တဲ့ စာလုံးနဲ့ ကိုက်ညီတဲ့ Username တွေ အောက်မှာ ဘားတန်းပုံစံ ပေါ်လာမယ့် Container နေရာ။
+ * **Result Display Area (<div>):**
+   * User က ဘားတန်းထဲက တစ်ခုခုကို ရွေးလိုက်တဲ့အခါ (သို့မဟုတ်) Enter ခေါက်လိုက်တဲ့အခါ အဲ့ဒီလူရဲ့ အချက်အလက် အပြည့်အစုံကို လှပစွာ ထုတ်ပြပေးမယ့် နေရာ။
+### ၂. style.css (ဒီဇိုင်းနှင့် UI/UX စနစ်)
+ဘားတန်းနဲ့ ရှာဖွေရေး ပုံစံ လှပသပ်ရပ်ဖို့အတွက် လိုအပ်တဲ့ Style တွေ ပါဝင်ပါမယ်။
+ * **Dropdown Styling:**
+   * Input ရဲ့ အောက်တည့်တည့်မှာ လှပစွာ ပေါ်လာဖို့ position: absolute၊ အရိပ်အယောင်ပေးဖို့ box-shadow နဲ့ နောက်ခံအရောင်တွေ စီစဉ်ခြင်း။
+ * **List Item Hover Effects:**
+   * Mouse တင်လိုက်ရင် (Hover) အရောင်ပြောင်းသွားတာမျိုး သို့မဟုတ် လက်ညှိပုံစံ (Pointer) ပေါ်လာအောင် လုပ်ခြင်း။
+ * **Mobile Responsiveness:**
+   * ဖုန်းစခရင်င်သေးသေးတွေမှာပါ ဘားတန်းနဲ့ စာသားတွေ မလွင့်သွားအောင် CSS Media Queries နဲ့ Grid/Flexbox သုံးပြီး ချိန်ညှိခြင်း။
+### ၃. main-index.js (Root Index & L1 Router)
+ဒါက စနစ်တစ်ခုလုံးရဲ့ ပထမဆုံး ဝင်ပေါက် Index ဖိုင်ဖြစ်ပါတယ်။
+ * **Global Root Mapping Object:**
+   * အဓိက အက္ခရာအစတွေကို Sub-index ဖိုင်လမ်းကြောင်းနဲ့ ချိတ်ပေးထားတဲ့ Variable တစ်ခု ပါရှိရပါမယ်။
+   * *ဥပမာ:* const rootIndex = { "a": "indices/index-a.js", "b": "indices/index-b.js", "m": "indices/index-m.js" };
+ * **Dynamic Script Loader / Fetcher System:**
+   * User ရိုက်လိုက်တဲ့ စာလုံးရဲ့ ပထမစာလုံး (ဥပမာ a) ကို ယူပြီး သက်ဆိုင်ရာ Sub-index ဖိုင် (indices/index-a.js) ကို Browser ထဲကို တက်လာအောင် ဒိုင်းနမစ်နည်းနဲ့ ချိတ်ဆက်ပေးတဲ့ စနစ်။
+### ၄. indices/ (Sub-index Files - ဥပမာ index-a.js, index-m.js)
+Prefix အသေးစိတ်နဲ့ Chunk ဖိုင်တွေကို ချိတ်ဆက်ပေးတဲ့ ညွှန်းစာအုပ်ငယ်များ ဖြစ်ပါတယ်။
+ * **Prefix-to-Chunk Mapping Object:**
+   * စာလုံးနှစ်လုံးတွဲ (သို့မဟုတ် A1 နည်းပါး Prefix) တွေနဲ့ တကယ့် Data Chunk ဖိုင် Path တွေကို တိုက်ရိုက် ချိတ်ပေးထားရပါမယ်။
+   * *ဥပမာ (index-a.js ထဲမှာ):* const indexA = { "au": "chunks/chunk-au.js", "ar": "chunks/chunk-ar.js" };
+   * *ဥပမာ (index-m.js ထဲမှာ - A1 နည်းလမ်းသုံးထားပုံ):* const indexM = { "ma1": "chunks/chunk-ma1.js", "ma2": "chunks/chunk-ma2.js" };
+### ၅. chunks/ (Data Chunk Files - ဥပမာ chunk-au.js, chunk-ma1.js)
+တကယ့် Username နဲ့ အချက်အလက်တွေ အပြည့်အစုံ သိမ်းထားမယ့် ဒေတာဖိုင်များ ဖြစ်ပါတယ်။
+ * **Raw Data Array Structure:**
+   * JSON ဖိုင်အစား Browser မှာ တိုက်ရိုက်သုံးလို့ရတဲ့ JavaScript Variable ပုံစံနဲ့ သိမ်းဆည်းရပါမယ် (CORS ပြဿနာ မရှိစေရန်)။
+   * *ဥပမာ:* const chunkAU = [ { username: "aungaung", community: "tech", name: "အောင်အောင်" }, ... ];
+ * **Data Export / Global Accessibility:**
+   * ဒီ Chunk ဖိုင်ကို HTML ထဲမှာ script Tag နဲ့ဖြစ်စေ၊ fetch နဲ့ဖြစ်စေ ခေါ်သုံးတဲ့အခါ Main JavaScript က အလွယ်တကူ လှမ်းဖတ်လို့ရအောင် ပြင်ဆင်ထားခြင်း။
+### ၆. main-app.js (ပင်မ ဦးနှောက်နှင့် ရှာဖွေရေး စနစ် - Core Logic)
+စနစ်တစ်ခုလုံးကို အသက်သွင်းပေးမယ့် အဓိက JavaScript ကုဒ်ဖိုင်ဖြစ်ပြီး အောက်ပါ System Function တွေ ပါဝင်ရပါမယ် -
+ 1. **Input Listener (Event Handler):**
+   * User စာရိုက်လိုက်တိုင်း (Type လုပ်ချိန်တိုင်း) ဘာတွေ လုပ်ရမလဲဆိုတာကို စတင်ပေးမယ့် Trigger Function။
+ 2. **Prefix Extractor Function:**
+   * ရိုက်လိုက်တဲ့ စာလုံး (ဥပမာ aungaung) ကနေ လိုအပ်တဲ့ Prefix (ဥပရာ au) ကို ဖြတ်ယူပေးမယ့် Logic။
+ 3. **Multi-level Resolution Function:**
+   * main-index.js ကို အရင်လှမ်းစစ်၊ ပြီးရင် indices/ ဖိုင်ကို ဆက်သွား၊ အဲ့ဒီကနေမှတဆင့် chunks/ ဖိုင်ကို တိကျစွာ ရှာဖွေဖော်ထုတ်ပေးမယ့် စနစ်။
+ 4. **Memory Caching System:**
+   * အစောက ဆွေးနွေးခဲ့သလို ဖတ်ပြီးသား Index နဲ့ Chunk တွေကို Variable ထဲမှာ သိမ်းထားပြီး (loadedChunks = {}) နောက်တစ်ခါ ထပ်မရှာခိုင်းဘဲ မြန်မြန်ဆန်ဆန် ထုတ်ပေးမယ့် Optimization Function။
+ 5. **Autocomplete UI Renderer:**
+   * ရှာတွေ့လာတဲ့ Username တွေထဲကမှ ကိုက်ညီတာတွေကို စစ်ထုတ်ပြီး (Filter) HTML ရဲ့ Dropdown ဘားတန်းထဲမှာ စာရင်းလုပ်ပြီး ထည့်ပြပေးမယ့် Function။
+ 6. **Selection & Detail Viewer Function:**
+   * User က ဘားတန်းထဲက နာမည်တစ်ခုကို နှိပ်လိုက်တဲ့အခါ (Click) သို့မဟုတ် Enter ခေါက်လိုက်တဲ့အခါ အဲ့ဒီလူရဲ့ အချက်အလက်အပြည့်အစုံကို Screen ပေါ်မှာ ပေါ်လာအောင် လုပ်ပေးမယ့် Function။
+ဒီလုပ်ဆောင်ချက်တွေနဲ့ စနစ်တွေကို အဆင့်ဆင့် တည်ဆောက်သွားမယ်ဆိုရင် **GitHub Pages မှာ Hosting အလကားနဲ့ သန်းနဲ့ချီတဲ့ ဒေတာတွေကို လုံးဝမထစ်ဘဲ အလွန်မြန်ဆန်စွာ ရှာဖွေနိုင်မယ့် Professional Static Search System တစ်ခု** အပြည့်အစုံ ဖြစ်လာပါမယ်။ ဒီထဲကနေ ပထမဆုံး ဘယ်အပိုင်း (ဥပမာ Index ပိုင်း ဒါမှမဟုတ် UI ပိုင်း) ရဲ့ ကုဒ်နမူနာကို စရေးကြမလဲ ခင်ဗျ?
