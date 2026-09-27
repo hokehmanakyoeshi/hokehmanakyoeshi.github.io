@@ -1,0 +1,18 @@
+my-website/
+├── index.html                 <-- ပင်မ UI နှင့် Search Box (Autocomplete ဘားတန်းပါမည်)
+├── style.css                  <-- CSS ဒီဇိုင်းနှင့် ဘားတန်း Styling များ
+├── main-app.js                <-- ရှာဖွေရေး၊ Index ဖတ်ခြင်းနှင့် Fetch လုပ်မည့် ပင်မ JavaScript ကုဒ်
+│
+├── main-index.js              <-- အဓိက Root Index (အက္ခရာ A, B, M စသည်ဖြင့် Sub-index ဆီ လမ်းညွှန်းမည်)
+│
+├── indices/                   <-- Sub-indices များ သိမ်းမည့် ဖိုင်တွဲ (Nested Level)
+│   ├── index-a.js             <-- 'a' အက္ခရာအောက်ရှိ Prefix များ (ဥပမာ - au, ar စသည်ဖြင့်)
+│   ├── index-b.js             <-- 'b' အက္ခရာအောက်ရှိ Prefix များ (ဥပမာ - ba, bi စသည်ဖြင့်)
+│   └── index-m.js             <-- 'm' အက္ခရာအောက်ရှိ Prefix များ (ဥပမာ - ma1, ma2, mo စသည်ဖြင့်)
+│
+└── chunks/                    <-- တကယ့် ဒေတာ Chunk ဖိုင်များ (Folder တစ်ခုတည်းအောက်တွင် အားလုံး တန်းစီမည်)
+    ├── chunk-au.js            <-- 'au' ဆိုင်ရာ ဒေတာများ
+    ├── chunk-ba.js            <-- 'ba' ဆိုင်ရာ ဒေတာများ
+    ├── chunk-ma1.js           <-- 'လူထူ၍ ခွဲထားသော ma ၏ ပထမပိုင်း' ဒေတာများ (A1 နည်းလမ်း)
+    ├── chunk-ma2.js           <-- 'လူထူ၍ ခွဲထားသော ma ၏ ဒုတိယပိုင်း' ဒေတာများ (A1 နည်းလမ်း)
+    └── chunk-ky.js            <-- 'ky' ဆိုင်ရာ ဒေတာများ
