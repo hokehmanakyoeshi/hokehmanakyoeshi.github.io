@@ -1,4 +1,3 @@
-
 function getRootIndex() {
     return [
         { key: 'a', file: 'indices/index-a.js' },
