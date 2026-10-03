@@ -1,7 +1,7 @@
 function getChunkBook_mama() {
     return [
         {
-    bookId: "မမငသ",
+    bookId: "pali-grammar",
     title: "မိုးမိုးမြင့်အောင်",
     author: "ဦးဗိုးထွန်း",
     description: "ပါဠိဘာသာစကား၏ အခြေခံသဒ္ဒါ၊ ရုပ်တွက်နှင့် ပုဒ်စပ်နည်းများ။",
