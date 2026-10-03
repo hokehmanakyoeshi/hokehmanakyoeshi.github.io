@@ -1,0 +1,26 @@
+:root {
+    --bg-color: #f9f9f9;
+    --card-bg: #ffffff;
+    --text-color: #222222;
+    --border-color: #e0e0e0;
+    --subtext-color: #666666;
+    --tag-bg: #f1f1f1;
+}
+
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --border-color: #333333;
+    --subtext-color: #aaaaaa;
+    --tag-bg: #2a2a2a;
+}
+
+body.reading-mode {
+    --bg-color: #fbf0d9;
+    --card-bg: #f5e6cc;
+    --text-color: #3b2f2f;
+    --border-color: #dfceb5;
+    --subtext-color: #705d52;
+    --tag-bg: #eddcc2;
+}
