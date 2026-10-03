@@ -1,8 +1,19 @@
 function getChunkBook_mama() {
     return [
         {
-            bookId: "barphyit",
-            title: "မိုးမိုးမြင့်အောင်",
+    bookId: "မမငသ",
+    title: "မိုးမိုးမြင့်အောင်",
+    author: "ဦးဗိုးထွန်း",
+    description: "ပါဠိဘာသာစကား၏ အခြေခံသဒ္ဒါ၊ ရုပ်တွက်နှင့် ပုဒ်စပ်နည်းများ။",
+    cover: "https://via.placeholder.com/65x90/C49102/000000?text=Pali",
+    readers: [
+        { username: "aungaung", displayName: "အောင်အောင်" },
+        { username: "aunhtay", displayName: "အောင်ဌေး" }
+    ]
+},
+{
+            bookId: "မမ",
+            title: "မိုးမိုးအောင်အောင်",
             author: "ဦးဗိုးထွန်း",
             description: "ပါဠိဘာသာစကား၏ အခြေခံသဒ္ဒါ၊ ရုပ်တွက်နှင့် ပုဒ်စပ်နည်းများ။",
             cover: "https://via.placeholder.com/65x90/C49102/000000?text=Pali",
@@ -11,6 +22,18 @@ function getChunkBook_mama() {
                 { username: "aunhtay", displayName: "အောင်ဌေး" }
             ]
         },{
+    bookId: "မမက",
+    title: "မိုးမိုးတိုးအောင်",
+    author: "ဦးဗိုးထွန်း",
+    description: "ပါဠိဘာသာစကား၏ အခြေခံသဒ္ဒါ၊ ရုပ်တွက်နှင့် ပုဒ်စပ်နည်းများ။",
+    cover: "https://via.placeholder.com/65x90/C49102/000000?text=Pali",
+    readers: [
+        { username: "aungaung", displayName: "အောင်အောင်" },
+        { username: "aunhtay", displayName: "အောင်ဌေး" }
+    ]
+},
+        
+        {
     bookId: "pali-grammar1",
     title: "မိုးမိုးကိုကို",
     author: "ဦးဗိုးထွန်း",
