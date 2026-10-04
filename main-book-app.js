@@ -1,41 +1,62 @@
-// မြန်မာသရ၊ အသတ်နှင့် သင်္ကေတများကို ရှင်းထုတ်ပေးမည့် Function (အသတ်များကိုပါ လုံးဝဖယ်ရှားသည်)
 function normalizeMyanmarText(text) {
     if (!text) return "";
     return text
-        .replace(/[က-အ]်/g, "") // အသတ်ပါသော အက္ခရာများကို ဖယ်မည် (ဥပမာ - 'င်', 'တ်', 'က်', 'ခ်')
-        .replace(/[\u102B-\u103E\u1056-\u1059]/g, "") // သရနှင့် အခြားသင်္ကေတများ ဖြုတ်မည်
+        .replace(/[က-အ]်/g, "")
+        .replace(/[\u102B-\u103E\u1056-\u1059]/g, "")
         .toLowerCase();
 }
 
-// အကိုလိုချင်တဲ့ Logic အတိုင်း အသတ်တွေကို လုံးဝကျော်လွန်ပြီး တစ်လုံးချင်း အစဉ်လိုက် တိုက်စစ်ပေးမည့် Function
 function isMatchWithNormalizedSequence(title, query) {
     if (!title || !query) return false;
     
-    // စာအုပ်ခေါင်းစဉ်နှင့် ရှာမည့်စာသားကို Normalize လုပ်မည် (အသတ်များနှင့် သရများ ကင်းစင်သွားမည်)
     const normTitle = normalizeMyanmarText(title);
     const normQuery = normalizeMyanmarText(query);
 
     if (normQuery.length === 0) return false;
 
-    // တိုက်ရိုက် ပါဝင်နေခြင်း (သို့) အစမှ စတင်တိုက်ဆိုင်ခြင်း ရှိမရှိ အရင်စစ်မည်
     if (normTitle.includes(normQuery)) {
         return true;
     }
 
-    // စာလုံးတစ်လုံးချင်း အစဉ်လိုက် (Sequential) တိုက်စစ်ခြင်း 
-    // (ဥပမာ - "မမမအ" ဟု ရှာလျှင် "မိုးမိုးမြင့်အောင်" ထဲမှ အသတ် "င်" ကိုကျော်၍ "မ", "မ", "မြ (မ)", "အ" တို့နှင့် အစဉ်လိုက် ကိုက်ညီမှုရှိမရှိ စစ်ဆေးသည်)
     let titleIdx = 0;
     let queryIdx = 0;
 
     while (titleIdx < normTitle.length && queryIdx < normQuery.length) {
         if (normTitle[titleIdx] === normQuery[queryIdx]) {
-            queryIdx++; // query ထဲက စာလုံး တစ်လုံး ကိုက်ညီသွားပြီဆိုလျှင် ရှေ့ဆက်တိုးမည်
+            queryIdx++;
         }
         titleIdx++;
     }
 
-    // query ထဲမှာ ရှိသမျှ စာလုံးတွေ အားလုံး အစဉ်လိုက် ကိုက်ညီသွားမှသာ true ဖြစ်မည်
     return queryIdx === normQuery.length;
+}
+
+// Global Shared Card Template Function (Search နှင့် New Feed နှစ်ခုစလုံးအတွက် တစ်ခုတည်းကို မျှဝေသုံးသည်)
+function createBookCardHTML(book, isSelected = false) {
+    const readersHTML = book.readers && book.readers.length > 0
+        ? book.readers.map(r => `<li class="book-tag">👤 ${r.displayName} (@${r.username})</li>`).join('')
+        : '<li class="book-tag muted">ဖတ်ရှုသူမရှိသေးပါ။</li>';
+
+    const cardClass = isSelected ? 'profile-card selected-highlight-card' : 'profile-card newfeed-card';
+    const badgeHTML = isSelected ? '<div class="card-top-badge">ရွေးချယ်ထားသော စာအုပ်</div>' : '';
+
+    return `
+        <div class="${cardClass}">
+            ${badgeHTML}
+            <div class="book-card-layout">
+                <img src="${book.cover || 'https://via.placeholder.com/65x90'}" alt="${book.title}" class="book-cover">
+                <div class="book-info-area">
+                    <h3 class="book-title-heading">${book.title}</h3>
+                    <p class="book-author-text">ရေးသားသူ: ${book.author || 'မသိရှိရပါ'}</p>
+                    <p class="card-bio">${book.description || ''}</p>
+                </div>
+            </div>
+            <div class="card-books">
+                <h4>ဖတ်ရှုထားသူများ:</h4>
+                <ul class="books-list">${readersHTML}</ul>
+            </div>
+        </div>
+    `;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,29 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
             document.head.appendChild(script);
         });
-    }
-
-    function createBookCardHTML(book) {
-        const readersHTML = book.readers && book.readers.length > 0
-            ? book.readers.map(r => `<li class="book-tag">${r.displayName} (@${r.username})</li>`).join('')
-            : '<li class="book-tag">ဖတ်ရှုသူမရှိသေးပါ။</li>';
-
-        return `
-            <div class="profile-card">
-                <div class="book-card-layout">
-                    <img src="${book.cover || 'https://via.placeholder.com/65x90'}" alt="${book.title}" class="book-cover">
-                    <div class="book-info-area">
-                        <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; color: var(--text-color);">${book.title}</h3>
-                        <p class="book-author-text">ရေးသားသူ: ${book.author || 'မသိရှိရပါ'}</p>
-                        <p class="card-bio">${book.description || ''}</p>
-                    </div>
-                </div>
-                <div class="card-books">
-                    <h4>ဖတ်ရှုထားသူများ:</h4>
-                    <ul class="books-list">${readersHTML}</ul>
-                </div>
-            </div>
-        `;
     }
 
     async function handleSearch(rawQuery) {
@@ -143,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (typeof window[chunkFunctionName] === 'function') {
                                 const chunkData = window[chunkFunctionName]();
                                 
-                                // အဓိက စစ်ဆေးချက် - တိကျသော Sequence Matching Logic ကို သုံးမည်
                                 const filtered = chunkData.filter(b => {
                                     const isTitleMatch = isMatchWithNormalizedSequence(b.title, query);
                                     const isAuthorMatch = isMatchWithNormalizedSequence(b.author || '', query);
@@ -184,16 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uniqueMatches.length > 0) {
             autocompleteDropdown.innerHTML = uniqueMatches.map(m => `
                 <div class="dropdown-item" data-bookid="${m.bookId}">
-                    <img src="${m.cover}" class="dropdown-book-cover" alt="">
-                    <div>
+                    <img src="${m.cover || 'https://via.placeholder.com/32x44'}" class="dropdown-book-cover" alt="">
+                    <div class="dropdown-meta">
                         <strong>${m.title}</strong>
-                        <div style="font-size:0.75rem; color:var(--subtext-color);">ရေးသားသူ: ${m.author}</div>
+                        <div class="dropdown-author">ရေးသားသူ: ${m.author || 'မသိရှိရပါ'}</div>
                     </div>
                 </div>
             `).join('');
             autocompleteDropdown.style.display = 'block';
         } else {
-            autocompleteDropdown.innerHTML = `<div class="no-result">မတွေ့ရှိရပါ</div>`;
+            autocompleteDropdown.innerHTML = `<div class="no-result">စာအုပ် မတွေ့ရှိရပါ။</div>`;
             autocompleteDropdown.style.display = 'block';
         }
     }
@@ -244,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 if (selectedBook && selectedBookContainer) {
-                    selectedBookContainer.innerHTML = createBookCardHTML(selectedBook);
+                    selectedBookContainer.innerHTML = createBookCardHTML(selectedBook, true);
                     selectedBookContainer.style.display = 'block';
                     selectedBookContainer.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -266,3 +263,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+    
