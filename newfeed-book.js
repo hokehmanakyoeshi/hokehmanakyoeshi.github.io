@@ -1,0 +1,102 @@
+document.addEventListener('DOMContentLoaded', async () => {
+    const newFeedContainer = document.getElementById('newFeedContainer');
+    const newFeedLoading = document.getElementById('newFeedLoading');
+    const refreshFeedBtn = document.getElementById('refreshFeedBtn');
+
+    function loadScriptOnce(filePath) {
+        return new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${filePath}"]`)) {
+                resolve();
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = filePath;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
+            document.head.appendChild(script);
+        });
+    }
+
+    async function generateMinarNewFeed() {
+        if (!newFeedContainer || !newFeedLoading) return;
+
+        newFeedLoading.style.display = 'flex';
+        newFeedContainer.style.display = 'none';
+        newFeedContainer.innerHTML = '';
+
+        try {
+            if (typeof getRootBookIndex !== 'function') {
+                await loadScriptOnce('main-book-index.js');
+            }
+
+            const rootIndices = getRootBookIndex();
+            if (!rootIndices || rootIndices.length === 0) {
+                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">စာအုပ် အညွှန်းများ မတွေ့ရှိရပါ။</span>`;
+                return;
+            }
+
+            let allChunkPaths = [];
+
+            for (const root of rootIndices) {
+                await loadScriptOnce(root.file);
+                const suffix = root.file.split('/').pop().replace('.js', '').replace('book-index-', '');
+                const indexFuncName = `getBookIndex_${suffix}`;
+
+                if (typeof window[indexFuncName] === 'function') {
+                    const subEntries = window[indexFuncName]();
+                    subEntries.forEach(entry => {
+                        if (entry.chunk && !allChunkPaths.includes(entry.chunk)) {
+                            allChunkPaths.push(entry.chunk);
+                        }
+                    });
+                }
+            }
+
+            if (allChunkPaths.length === 0) {
+                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">Chunk စာရင်းများ မရှိသေးပါ။</span>`;
+                return;
+            }
+
+            const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
+            await loadScriptOnce(randomChunkPath);
+
+            const chunkFileName = randomChunkPath.split('/').pop().replace('.js', '');
+            const chunkKey = chunkFileName.replace('chunk-book-', '');
+            const chunkFunctionName = `getChunkBook_${chunkKey}`;
+
+            if (typeof window[chunkFunctionName] === 'function') {
+                const chunkBooks = window[chunkFunctionName]();
+
+                if (chunkBooks && chunkBooks.length > 0) {
+                    const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
+                    const selectedFeedBooks = shuffledBooks.slice(0, 5);
+
+                    let feedHTML = '';
+                    selectedFeedBooks.forEach(book => {
+                        // Search ကဒ်ပုံစံအတိုင်း createBookCardHTML ကို တိုက်ရိုက်လှမ်းသုံးထားပါသည်
+                        feedHTML += createBookCardHTML(book, false);
+                    });
+
+                    newFeedContainer.innerHTML = feedHTML;
+                    newFeedContainer.style.display = 'block';
+                } else {
+                    newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">ဤကဏ္ဍတွင် စာအုပ် မရှိသေးပါ။</span>`;
+                }
+            }
+
+        } catch (error) {
+            console.error("New Feed Loading Error:", error);
+            newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
+        } finally {
+            newFeedLoading.style.display = 'none';
+        }
+    }
+
+    generateMinarNewFeed();
+
+    if (refreshFeedBtn) {
+        refreshFeedBtn.addEventListener('click', () => {
+            generateMinarNewFeed();
+        });
+    }
+});
