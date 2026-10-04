@@ -1,0 +1,88 @@
+.newfeed-section {
+  margin-top: 1.5rem;
+}
+
+.newfeed-header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.feed-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.feed-badge {
+  background-color: var(--primary-yellow);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feed-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.refresh-feed-btn {
+  background: var(--card-bg);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-color);
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: var(--transition);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.refresh-feed-btn:hover {
+  border-color: var(--primary-yellow);
+  color: var(--primary-yellow);
+  background-color: rgba(196, 145, 2, 0.05);
+}
+
+.refresh-feed-btn svg {
+  stroke: currentColor;
+  transition: transform 0.4s ease;
+}
+
+.refresh-feed-btn:active svg {
+  transform: rotate(180deg);
+}
+
+.newfeed-card {
+  border-left: 4px solid var(--primary-yellow);
+  animation: fadeInFeed 0.35s ease-in-out;
+  transition: var(--transition);
+}
+
+.newfeed-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+@keyframes fadeInFeed {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+} 
