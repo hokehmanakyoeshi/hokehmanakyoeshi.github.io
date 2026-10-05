@@ -1,5 +1,5 @@
 /**
- * Dynamic New Feed System (Optimized with Retry Mechanism)
+ * Dynamic New Feed System (Enterprise Grade & Self-Healing Architecture)
  */
 (() => {
     'use strict';
@@ -16,7 +16,7 @@
             return filePath.split('/').pop().replace('.js', '').replace(prefixToRemove, '');
         }
 
-        // --- Helper: Script ကို Safe ဖြစ်စွာ Retry ဖြင့် ဒေါင်းရန် ---
+        // --- Robust Script Loader with Retry ---
         async function loadScriptWithRetry(core, scriptPath, retries = 2) {
             for (let i = 0; i <= retries; i++) {
                 try {
@@ -24,14 +24,13 @@
                     return true;
                 } catch (err) {
                     if (i === retries) throw err;
-                    // ခဏစောင့်ပြီးမှ ထပ်ကြိုးစားမည် (Retry)
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    await new Promise(resolve => setTimeout(resolve, 400));
                 }
             }
         }
 
-        // --- Core Feed Generation Workflow ---
-        async function initAutoNewFeed() {
+        // --- Core Feed Generation Workflow (with Self-Healing Retry) ---
+        async function initAutoNewFeed(maxAttempts = 3) {
             if (isGenerating || !container || !loading) return;
 
             isGenerating = true;
@@ -39,77 +38,71 @@
             container.style.display = 'none';
             container.innerHTML = '';
 
-            try {
-                const core = window.BookAppCore;
-                if (!core) throw new Error("BookAppCore is not loaded");
-
-                // ၁။ Root Book Index ကို Retry ဖြင့် ဆွဲထုတ်ခြင်း
-                await loadScriptWithRetry(core, 'main-book-index.js');
-                if (typeof getRootBookIndex !== 'function') {
-                    throw new Error("getRootBookIndex function not found");
-                }
-
-                const rootIndices = getRootBookIndex();
-                if (!rootIndices || rootIndices.length === 0) {
-                    showEmptyState("စာအုပ် အညွှန်းများ မရှိပါ။");
-                    return;
-                }
-
-                // ၂။ Root ထဲမှ တစ်ခုကို Random ရွေးပြီး ဖိုင်ခေါ်ခြင်း
-                const randomRoot = rootIndices[Math.floor(Math.random() * rootIndices.length)];
-                await loadScriptWithRetry(core, randomRoot.file);
-
-                const rootSuffix = extractSuffix(randomRoot.file, 'book-index-');
-                const rootFuncName = `getBookIndex_${rootSuffix}`;
-
-                if (typeof window[rootFuncName] !== 'function') {
-                    throw new Error(`Function ${rootFuncName} not found`);
-                }
-
-                const subEntries = window[rootFuncName]();
-                const validChunks = subEntries.filter(e => e.chunk);
-
-                if (validChunks.length === 0) {
-                    showEmptyState("စာအုပ် အစုအဝေးများ မရှိပါ။");
-                    return;
-                }
-
-                // ၃။ Chunk ထဲမှ တစ်ခုကို Random ရွေးပြီး ဒေတာဆွဲခြင်း
-                const randomEntry = validChunks[Math.floor(Math.random() * validChunks.length)];
-                await loadScriptWithRetry(core, randomEntry.chunk);
-
-                const chunkKey = extractSuffix(randomEntry.chunk, 'chunk-book-');
-                const chunkFuncName = `getChunkBook_${chunkKey}`;
-
-                if (typeof window[chunkFuncName] !== 'function') {
-                    throw new Error(`Function ${chunkFuncName} not found`);
-                }
-
-                const chunkBooks = window[chunkFuncName]();
-                if (!chunkBooks || chunkBooks.length === 0) {
-                    showEmptyState("စာအုပ် အချက်အလက် မရှိပါ။");
-                    return;
-                }
-
-                // ၄။ ရလာသော စာအုပ်များကို Random ရော၍ အများဆုံး ၂၀ အုပ် ယူခြင်း
-                const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
-                const selected = shuffled.slice(0, 20);
-
-                const html = selected.map(book => core.createBookCardHTML(book, false)).join('');
-                
-                container.innerHTML = html;
-                container.style.display = 'block';
-                loading.style.display = 'none';
-
-            } catch (err) {
-                console.error("Auto New Feed Error:", err);
-                showEmptyState("စာအုပ်များ ပေါ်လာရန် အမှားအယွင်းရှိနေပါသည်။");
-            } finally {
-                isGenerating = false; 
+            const core = window.BookAppCore;
+            if (!core) {
+                console.error("BookAppCore is not loaded");
+                showEmptyState("စနစ် အခြေခံ မူလဖိုင် မတွေ့ပါ။");
+                isGenerating = false;
+                return;
             }
+
+            // Self-Healing Loop: တစ်ခုခုမှားယွင်းရင် အခြားလမ်းကြောင်းဖြင့် အလိုအလျောက် ထပ်ကြိုးစားမည်
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    await loadScriptWithRetry(core, 'main-book-index.js');
+                    if (typeof getRootBookIndex !== 'function') throw new Error("getRootBookIndex missing");
+
+                    const rootIndices = getRootBookIndex();
+                    if (!rootIndices || rootIndices.length === 0) throw new Error("Root indices empty");
+
+                    // Random Root Selection
+                    const randomRoot = rootIndices[Math.floor(Math.random() * rootIndices.length)];
+                    await loadScriptWithRetry(core, randomRoot.file);
+
+                    const rootSuffix = extractSuffix(randomRoot.file, 'book-index-');
+                    const rootFuncName = `getBookIndex_${rootSuffix}`;
+                    if (typeof window[rootFuncName] !== 'function') throw new Error(`${rootFuncName} missing`);
+
+                    const subEntries = window[rootFuncName]();
+                    const validChunks = subEntries.filter(e => e.chunk);
+                    if (validChunks.length === 0) continue; // ဒီ Root မှာ chunk မရှိရင် နောက်တစ်ခုထပ်စမ်းမည်
+
+                    // Random Chunk Selection
+                    const randomEntry = validChunks[Math.floor(Math.random() * validChunks.length)];
+                    await loadScriptWithRetry(core, randomEntry.chunk);
+
+                    const chunkKey = extractSuffix(randomEntry.chunk, 'chunk-book-');
+                    const chunkFuncName = `getChunkBook_${chunkKey}`;
+                    if (typeof window[chunkFuncName] !== 'function') continue;
+
+                    const chunkBooks = window[chunkFuncName]();
+                    if (!chunkBooks || chunkBooks.length === 0) continue;
+
+                    // Processing Books Data
+                    const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
+                    const selected = shuffled.slice(0, 20);
+
+                    container.innerHTML = selected.map(book => core.createBookCardHTML(book, false)).join('');
+                    container.style.display = 'block';
+                    loading.style.display = 'none';
+                    
+                    // အောင်မြင်စွာ ပြီးဆုံးပါက loop မှ ထွက်မည်
+                    isGenerating = false;
+                    return;
+
+                } catch (err) {
+                    console.warn(`Attempt ${attempt} failed, retrying...`, err);
+                    if (attempt === maxAttempts) {
+                        // အကြိမ်ရေပြည့်သွားမှသာ Error UI ကို ပြမည်
+                        showEmptyState("စာအုပ်များ ပေါ်လာရန် အမှားအယွင်းရှိနေပါသည်။");
+                    }
+                }
+            }
+
+            isGenerating = false;
         }
 
-        // --- Empty/Error State UI Helper ---
+        // --- UI Helper ---
         function showEmptyState(message) {
             loading.innerHTML = `<span style="color:var(--subtext-color);">${message}</span>`;
             loading.style.display = 'flex';
@@ -118,15 +111,15 @@
 
         // --- Event Listeners ---
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', initAutoNewFeed);
+            refreshBtn.addEventListener('click', () => initAutoNewFeed(1)); // ခလုတ်နှိပ်လျှင် တစ်ကြိမ်သာ သေချာဆွဲမည်
         }
 
-        // --- ဝင်ဝင်ချင်းမှာ နှစ်ချက်ဆက်တိုက် (Double Execution) အလိုအလျောက် ဖြစ်စေရန် ---
+        // --- Initial Double Execution (Optimized Sequence) ---
         setTimeout(async () => {
             await initAutoNewFeed();
             setTimeout(async () => {
                 await initAutoNewFeed();
-            }, 100); 
+            }, 150); 
         }, 150);
     });
 })();
