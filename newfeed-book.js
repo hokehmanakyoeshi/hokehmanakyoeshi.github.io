@@ -87,10 +87,18 @@
             }
         }
 
+                // ခလုတ်ကို ပုံမှန် တစ်ချက်နှိပ်ရင် တစ်ကြိမ်ပဲ ဖလှယ်မည်
         if (refreshBtn) {
             refreshBtn.addEventListener('click', initAutoNewFeed);
         }
 
-        setTimeout(initAutoNewFeed, 150);
+        // ဝင်ဝင်ချင်းမှာ နှစ်ချက်ဆက်တိုက် (Double Execution) အလိုအလျောက် ဖြစ်စေရန်
+        setTimeout(async () => {
+            await initAutoNewFeed(); // ပထမအကြိမ် ဆွဲမည်
+            setTimeout(async () => {
+                await initAutoNewFeed(); // ခေတ္တရပ်ပြီး ဒုတိယအကြိမ် ထပ်ဆွဲမည်
+            }, 100); 
+        }, 150);
+
     });
 })();
