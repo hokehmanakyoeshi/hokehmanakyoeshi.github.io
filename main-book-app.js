@@ -59,7 +59,7 @@ function createBookCardHTML(book, isSelected = false) {
     `;
 }
 
-// --- ချက်ချင်းအလုပ်လုပ်မည့် Self-Executing New Feed Logic ---
+// --- New Feed Logic နှင့် ဝင်လာချင်း အလိုအလျောက် Trigger လုပ်မည့်စနစ် ---
 (function() {
     function loadScriptSafely(filePath) {
         return new Promise((resolve) => {
@@ -147,22 +147,24 @@ function createBookCardHTML(book, isSelected = false) {
         }
     }
 
-    // စာမျက်နှာ အပြည့်အစုံ Load ဖြစ်တာနဲ့ ချက်ချင်းအလုပ်လုပ်ရန် (Delay 500ms ထည့်ထားသည်)
-    if (document.readyState === 'complete') {
-        setTimeout(initAutoNewFeed, 500);
-    } else {
-        window.addEventListener('load', () => {
-            setTimeout(initAutoNewFeed, 500);
-        });
-    }
-
-    // လဲလှယ်ရန် ခလုပ်အတွက်
+    // လဲလှယ်ရန် ခလုပ်အတွက် Event Listener
     const refreshBtn = document.getElementById('refreshFeedBtn');
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
             initAutoNewFeed();
         });
     }
+
+    // စာမျက်နှာ ဝင်လာသည်နှင့် ၃၀၀ မီလီစက္ကန့်စောင့်ပြီး ခလုပ်ကို အလိုအလျောက် နှိပ်ခိုင်းခြင်း (Auto-Trigger)
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (refreshBtn) {
+                refreshBtn.click();
+            } else {
+                initAutoNewFeed();
+            }
+        }, 300);
+    });
 })();
 
 // --- Search Logic ---
