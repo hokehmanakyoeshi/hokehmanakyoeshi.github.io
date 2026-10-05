@@ -59,7 +59,106 @@ function createBookCardHTML(book, isSelected = false) {
     `;
 }
 
+// --- New Feed Helper & Logic ---
+async function loadScriptOnce(filePath) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${filePath}"]`)) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = filePath;
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
+        document.head.appendChild(script);
+    });
+}
+
+async function generateMinarNewFeed() {
+    const newFeedContainer = document.getElementById('newFeedContainer');
+    const newFeedLoading = document.getElementById('newFeedLoading');
+    if (!newFeedContainer || !newFeedLoading) return;
+
+    newFeedLoading.style.display = 'flex';
+    newFeedContainer.style.display = 'none';
+    newFeedContainer.innerHTML = '';
+
+    try {
+        if (typeof getRootBookIndex !== 'function') {
+            await loadScriptOnce('main-book-index.js');
+        }
+
+        const rootIndices = getRootBookIndex();
+        if (!rootIndices || rootIndices.length === 0) {
+            newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">စာအုပ် အညွှန်းများ မတွေ့ရှိရပါ။</span>`;
+            return;
+        }
+
+        let allChunkPaths = [];
+        for (const root of rootIndices) {
+            await loadScriptOnce(root.file);
+            const suffix = root.file.split('/').pop().replace('.js', '').replace('book-index-', '');
+            const indexFuncName = `getBookIndex_${suffix}`;
+
+            if (typeof window[indexFuncName] === 'function') {
+                const subEntries = window[indexFuncName]();
+                subEntries.forEach(entry => {
+                    if (entry.chunk && !allChunkPaths.includes(entry.chunk)) {
+                        allChunkPaths.push(entry.chunk);
+                    }
+                });
+            }
+        }
+
+        if (allChunkPaths.length === 0) {
+            newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">Chunk စာရင်းများ မရှိသေးပါ။</span>`;
+            return;
+        }
+
+        const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
+        await loadScriptOnce(randomChunkPath);
+
+        const chunkFileName = randomChunkPath.split('/').pop().replace('.js', '');
+        const chunkKey = chunkFileName.replace('chunk-book-', '');
+        const chunkFunctionName = `getChunkBook_${chunkKey}`;
+
+        if (typeof window[chunkFunctionName] === 'function') {
+            const chunkBooks = window[chunkFunctionName]();
+
+            if (chunkBooks && chunkBooks.length > 0) {
+                const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
+                const selectedFeedBooks = shuffledBooks.slice(0, 5);
+
+                let feedHTML = '';
+                selectedFeedBooks.forEach(book => {
+                    feedHTML += createBookCardHTML(book, false);
+                });
+
+                newFeedContainer.innerHTML = feedHTML;
+                newFeedContainer.style.display = 'block';
+            } else {
+                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">ဤကဏ္ဍတွင် စာအုပ် မရှိသေးပါ။</span>`;
+            }
+        }
+    } catch (error) {
+        console.error("New Feed Loading Error:", error);
+        newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
+    } finally {
+        newFeedLoading.style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // ဝင်လာချင်း New Feed ကို အလိုအလျောက် ခေါ်ယူပြသမည်
+    generateMinarNewFeed();
+
+    const refreshFeedBtn = document.getElementById('refreshFeedBtn');
+    if (refreshFeedBtn) {
+        refreshFeedBtn.addEventListener('click', () => {
+            generateMinarNewFeed();
+        });
+    }
+
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearBtn');
     const autocompleteDropdown = document.getElementById('autocompleteDropdown');
@@ -72,20 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (loadingIndicator) {
             loadingIndicator.style.display = show ? 'flex' : 'none';
         }
-    }
-
-    function loadScript(filePath) {
-        return new Promise((resolve, reject) => {
-            if (document.querySelector(`script[src="${filePath}"]`)) {
-                resolve();
-                return;
-            }
-            const script = document.createElement('script');
-            script.src = filePath;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
-            document.head.appendChild(script);
-        });
     }
 
     async function handleSearch(rawQuery) {
@@ -103,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (typeof getRootBookIndex !== 'function') {
-                await loadScript('main-book-index.js');
+                await loadScriptOnce('main-book-index.js');
             }
 
             const rootIndices = getRootBookIndex();
@@ -113,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetRoot = rootIndices.find(r => r.key === firstChar);
 
             if (targetRoot) {
-                await loadScript(targetRoot.file);
+                await loadScriptOnce(targetRoot.file);
                 
                 const indexFileName = targetRoot.file.split('/').pop().replace('.js', '');
                 const suffix = indexFileName.replace('book-index-', '');
@@ -130,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         for (const entry of relevantEntries) {
                             if (!loadedChunksCache[entry.chunk]) {
-                                await loadScript(entry.chunk);
+                                await loadScriptOnce(entry.chunk);
                                 loadedChunksCache[entry.chunk] = true;
                             }
 
@@ -263,4 +348,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    
