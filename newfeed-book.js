@@ -20,13 +20,12 @@
     async function generateMinarNewFeed() {
         if (!newFeedContainer || !newFeedLoading) return;
 
-        // ပထမဦးစွာ Loading Spinner ကို ပြသပြီး Container ကို ခေတ္တ ဖုံးထားမည်
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
 
         try {
-            // main-book-index.js ရောက်ရှိနေခြင်း ရှိမစစ်ဆေးဘဲ Load လုပ်မည်
+            // main-book-index.js ပါဝင်လာစေရန် သေချာစောင့်ဆိုင်းမည်
             if (typeof getRootBookIndex !== 'function') {
                 await loadScriptOnce('main-book-index.js');
             }
@@ -59,7 +58,6 @@
                 return;
             }
 
-            // Chunk ဖိုင်များကို Random ရွေးချယ်မည်
             const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
             await loadScriptOnce(randomChunkPath);
 
@@ -71,7 +69,6 @@
                 const chunkBooks = window[chunkFunctionName]();
 
                 if (chunkBooks && chunkBooks.length > 0) {
-                    // ဒေတာများကို အမြဲတမ်း Random အနေဖြင့် ရောနှောပြသမည်
                     const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
                     const selectedFeedBooks = shuffledBooks.slice(0, 5);
 
@@ -91,19 +88,24 @@
             console.error("New Feed Loading Error:", error);
             newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
         } finally {
-            // လုပ်ဆောင်ချက်ပြီးဆုံးပါက Loading ကို ဖျောက်မည်
             newFeedLoading.style.display = 'none';
         }
     }
 
-    // စာမျက်နှာ ဝင်လာသည်နှင့် (သို့မဟုတ်) DOMContentLoaded ပြီးသည်နှင့် ချက်ချင်း အလုပ်စလုပ်မည်
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', generateMinarNewFeed);
-    } else {
-        generateMinarNewFeed();
+    // GitHub Pages တွင် Script များ အပြည့်အစုံ Load ဖြစ်စေရန် အနည်းငယ်စောင့်ပေးသော Logic
+    function initFeedWithDelay() {
+        setTimeout(() => {
+            generateMinarNewFeed();
+        }, 150); // မီလီစက္ကန့် ၁၅၀ အကြာတွင် အလိုအလျောက် စတင်မည်
     }
 
-    // လဲလှယ်ရန် ခလုပ်နှိပ်လျှင် အသစ်တဖန် Random ဆွဲထုတ်ပေးရန်
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        initFeedWithDelay();
+    } else {
+        window.addEventListener('DOMContentLoaded', initFeedWithDelay);
+    }
+
+    // လဲလှယ်ရန် ခလုပ်အတွက်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
