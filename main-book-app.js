@@ -59,6 +59,11 @@ function createBookCardHTML(book, isSelected = false) {
     `;
 }
 
+// ⭐️ အခြားဖိုင်များ (newfeed-book.js) မှ ခေါ်သုံးနိုင်ရန် Global Window Object သို့ ချိတ်ပေးခြင်း
+window.createBookCardHTML = createBookCardHTML;
+window.normalizeMyanmarText = normalizeMyanmarText;
+window.isMatchWithNormalizedSequence = isMatchWithNormalizedSequence;
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearBtn');
@@ -263,4 +268,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    
