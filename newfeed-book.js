@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
@@ -95,13 +95,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် အလုပ်လုပ်ရန်
+    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် အလုပ်လုပ်ရန် Event Listener ချိတ်ခြင်း
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
         });
     }
 
-    // ဝင်လာချင်း Function ကို တိုက်ရိုက် ချက်ချင်း ခေါ်ယူခြင်း (အသေချာဆုံးနှင့် အမြန်ဆုံး နည်းလမ်း)
+    // စာမျက်နှာ ဝင်လာသည်နှင့် နှိပ်စရာမလိုဘဲ New Feed ကို ချက်ချင်း အလိုအလျောက် တိုက်ရိုက်ထုတ်ပေးမည်
     generateMinarNewFeed();
 });
