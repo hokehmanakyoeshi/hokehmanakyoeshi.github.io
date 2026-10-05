@@ -1,4 +1,4 @@
-(function () {
+document.addEventListener('DOMContentLoaded', async () => {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
@@ -20,12 +20,12 @@
     async function generateMinarNewFeed() {
         if (!newFeedContainer || !newFeedLoading) return;
 
+        // Loading ကို အစပြုပြသမည်
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
 
         try {
-            // main-book-index.js ပါဝင်လာစေရန် သေချာစောင့်ဆိုင်းမည်
             if (typeof getRootBookIndex !== 'function') {
                 await loadScriptOnce('main-book-index.js');
             }
@@ -58,6 +58,7 @@
                 return;
             }
 
+            // Chunk ဖိုင်များထဲမှ တစ်ခုကို အမြဲတမ်း Random ရွေးမည်
             const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
             await loadScriptOnce(randomChunkPath);
 
@@ -69,6 +70,7 @@
                 const chunkBooks = window[chunkFunctionName]();
 
                 if (chunkBooks && chunkBooks.length > 0) {
+                    // ရလာသော Chunk ထဲက စာအုပ်များကို အမြဲတမ်း Random နှံ့စပ်အောင် ရောပြီး ၅ အုပ် ယူမည်
                     const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
                     const selectedFeedBooks = shuffledBooks.slice(0, 5);
 
@@ -88,27 +90,24 @@
             console.error("New Feed Loading Error:", error);
             newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
         } finally {
+            // Loading ကို ဖျောက်မည်
             newFeedLoading.style.display = 'none';
         }
     }
 
-    // GitHub Pages တွင် Script များ အပြည့်အစုံ Load ဖြစ်စေရန် အနည်းငယ်စောင့်ပေးသော Logic
-    function initFeedWithDelay() {
-        setTimeout(() => {
-            generateMinarNewFeed();
-        }, 150); // မီလီစက္ကန့် ၁၅၀ အကြာတွင် အလိုအလျောက် စတင်မည်
-    }
-
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initFeedWithDelay();
-    } else {
-        window.addEventListener('DOMContentLoaded', initFeedWithDelay);
-    }
-
-    // လဲလှယ်ရန် ခလုပ်အတွက်
+    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်မှသာ အခြား Chunk တစ်ခုသို့ ပြောင်းလဲပြီး Random အသစ်ထပ်ပြမည်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
         });
     }
-})();
+
+    // စာမျက်နှာ စတင်ဝင်ရောက်လာသည်နှင့် ၃၀၀ မီလီစက္ကန့်စောင့်ပြီး လဲလှယ်ရန်ခလုတ်ကို အလိုအလျောက် နှိပ်ခိုင်းခြင်း (Auto-Trigger)
+    if (refreshFeedBtn) {
+        setTimeout(() => {
+            refreshFeedBtn.click();
+        }, 300);
+    } else {
+        generateMinarNewFeed();
+    }
+});
