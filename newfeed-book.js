@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function generateMinarNewFeed() {
         if (!newFeedContainer || !newFeedLoading) return;
 
+        // Loading ကို အစပြုပြသမည်
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            // Chunk ဖိုင်များထဲမှ တစ်ခုကို အမြဲတမ်း Random ရွေးမည်
             const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
             await loadScriptOnce(randomChunkPath);
 
@@ -68,12 +70,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const chunkBooks = window[chunkFunctionName]();
 
                 if (chunkBooks && chunkBooks.length > 0) {
+                    // ရလာသော Chunk ထဲက စာအုပ်များကို အမြဲတမ်း Random နှံ့စပ်အောင် ရောပြီး ၅ အုပ် ယူမည်
                     const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
                     const selectedFeedBooks = shuffledBooks.slice(0, 5);
 
                     let feedHTML = '';
                     selectedFeedBooks.forEach(book => {
-                        // Search ကဒ်ပုံစံအတိုင်း createBookCardHTML ကို တိုက်ရိုက်လှမ်းသုံးထားပါသည်
                         feedHTML += createBookCardHTML(book, false);
                     });
 
@@ -88,12 +90,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("New Feed Loading Error:", error);
             newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
         } finally {
+            // Loading ကို ဖျောက်မည်
             newFeedLoading.style.display = 'none';
         }
     }
 
+    // စာမျက်နှာ စတင်ဝင်ရောက်လာသည်နှင့် တစ်ပြိုင်နက် New Feed ကို ချက်ချင်း အလိုအလျောက် ခေါ်ယူပြသမည်
     generateMinarNewFeed();
 
+    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်မှသာ အခြား Chunk တစ်ခုသို့ ပြောင်းလဲပြီး Random အသစ်ထပ်ပြမည်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
