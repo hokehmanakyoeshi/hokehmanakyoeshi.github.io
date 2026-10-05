@@ -1,5 +1,5 @@
 /**
- * Dynamic New Feed System (Optimized & Clean Architecture)
+ * Dynamic New Feed System (Optimized with Retry Mechanism)
  */
 (() => {
     'use strict';
@@ -16,6 +16,20 @@
             return filePath.split('/').pop().replace('.js', '').replace(prefixToRemove, '');
         }
 
+        // --- Helper: Script ကို Safe ဖြစ်စွာ Retry ဖြင့် ဒေါင်းရန် ---
+        async function loadScriptWithRetry(core, scriptPath, retries = 2) {
+            for (let i = 0; i <= retries; i++) {
+                try {
+                    await core.loadScript(scriptPath);
+                    return true;
+                } catch (err) {
+                    if (i === retries) throw err;
+                    // ခဏစောင့်ပြီးမှ ထပ်ကြိုးစားမည် (Retry)
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+        }
+
         // --- Core Feed Generation Workflow ---
         async function initAutoNewFeed() {
             if (isGenerating || !container || !loading) return;
@@ -29,8 +43,8 @@
                 const core = window.BookAppCore;
                 if (!core) throw new Error("BookAppCore is not loaded");
 
-                // ၁။ Root Book Index ကို ဆွဲထုတ်ခြင်း
-                await core.loadScript('main-book-index.js');
+                // ၁။ Root Book Index ကို Retry ဖြင့် ဆွဲထုတ်ခြင်း
+                await loadScriptWithRetry(core, 'main-book-index.js');
                 if (typeof getRootBookIndex !== 'function') {
                     throw new Error("getRootBookIndex function not found");
                 }
@@ -43,7 +57,7 @@
 
                 // ၂။ Root ထဲမှ တစ်ခုကို Random ရွေးပြီး ဖိုင်ခေါ်ခြင်း
                 const randomRoot = rootIndices[Math.floor(Math.random() * rootIndices.length)];
-                await core.loadScript(randomRoot.file);
+                await loadScriptWithRetry(core, randomRoot.file);
 
                 const rootSuffix = extractSuffix(randomRoot.file, 'book-index-');
                 const rootFuncName = `getBookIndex_${rootSuffix}`;
@@ -62,7 +76,7 @@
 
                 // ၃။ Chunk ထဲမှ တစ်ခုကို Random ရွေးပြီး ဒေတာဆွဲခြင်း
                 const randomEntry = validChunks[Math.floor(Math.random() * validChunks.length)];
-                await core.loadScript(randomEntry.chunk);
+                await loadScriptWithRetry(core, randomEntry.chunk);
 
                 const chunkKey = extractSuffix(randomEntry.chunk, 'chunk-book-');
                 const chunkFuncName = `getChunkBook_${chunkKey}`;
@@ -91,7 +105,7 @@
                 console.error("Auto New Feed Error:", err);
                 showEmptyState("စာအုပ်များ ပေါ်လာရန် အမှားအယွင်းရှိနေပါသည်။");
             } finally {
-                isGenerating = false; // လုပ်ငန်းစဉ်ပြီးဆုံးသည်နှင့် Lock ပြန်ဖြုတ်မည်
+                isGenerating = false; 
             }
         }
 
