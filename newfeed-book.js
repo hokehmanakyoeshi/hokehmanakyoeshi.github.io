@@ -1,5 +1,5 @@
 /**
- * Dynamic New Feed System (Enterprise Grade & Bulletproof Architecture v3)
+ * Dynamic New Feed System (Enterprise Grade & Unified Architecture)
  */
 (() => {
     'use strict';
@@ -41,7 +41,7 @@
             return null;
         }
 
-        // --- Core Feed Generation Workflow (with Self-Healing & Race Protection) ---
+        // --- Core Feed Generation Workflow (Unified Engine) ---
         async function initAutoNewFeed(maxAttempts = 4) {
             if (isGenerating || !container || !loading) return;
 
@@ -58,7 +58,7 @@
                 return;
             }
 
-            // Self-Healing Loop with Extended Attempts for 99.99% Reliability
+            // Self-Healing Loop for 99.99% Reliability
             for (let attempt = 1; attempt <= maxAttempts; attempt++) {
                 try {
                     await loadScriptWithRetry(core, 'main-book-index.js');
@@ -77,7 +77,7 @@
                     const rootFuncName = `getBookIndex_${rootSuffix}`;
                     
                     const getSubFunc = await waitForGlobalFunction(rootFuncName);
-                    if (!getSubFunc) continue; // ဒီ Root မှာ function မတွေ့ရင် နောက်တစ်ခုထပ်စမ်းမည်
+                    if (!getSubFunc) continue; 
 
                     const subEntries = getSubFunc();
                     const validChunks = subEntries.filter(e => e.chunk);
@@ -130,13 +130,9 @@
             refreshBtn.addEventListener('click', () => initAutoNewFeed(4));
         }
 
-        // --- Initial Double Execution (Optimized Sequence with State Separation) ---
-        setTimeout(async () => {
-            await initAutoNewFeed();
-            // ပထမတစ်ကြိမ် ပြီးဆုံးပြီးမှ ဒုတိယတစ်ကြိမ်ကို လုံခြုံစွာ ခေါ်ယူရန်
-            setTimeout(async () => {
-                await initAutoNewFeed();
-            }, 200); 
-        }, 150);
+        // --- Initial Single Execution (Clean & Smooth Visual Flow) ---
+        setTimeout(() => {
+            initAutoNewFeed(4);
+        }, 100);
     });
 })();
