@@ -78,9 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const chunkBooks = window[chunkFunctionName]();
 
                         if (chunkBooks && chunkBooks.length > 0) {
-                            // Chunk ထဲက စာအုပ်များကို Random ရော၍ အကုန်လုံး (All) ယူမည်
+                            // Chunk ထဲက စာအုပ်များကို Random ရောပြီး အများဆုံး စာအုပ် ၂၀ အုပ်သာ ယူမည်
                             const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
-                            const selected = shuffled;
+                            const selected = shuffled.slice(0, 20);
 
                             let html = '';
                             selected.forEach(book => {
