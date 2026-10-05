@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const chunkBooks = window[chunkFunctionName]();
 
                         if (chunkBooks && chunkBooks.length > 0) {
+                            // Chunk ထဲက စာအုပ်များကို Random ရော၍ အကုန်လုံး (All) ယူမည်
                             const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
                             const selected = shuffled;
 
@@ -116,14 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // စာမျက်နှာ ဝင်လာသည်နှင့် အလိုအလျောက် ခေါ်ယူခြင်း
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (refreshFeedBtn) {
-                refreshFeedBtn.click();
-            } else {
-                initAutoNewFeed();
-            }
-        }, 300);
-    });
+    // စာမျက်နှာ ဝင်လာသည်နှင့် ချက်ချင်း အလိုအလျောက် ခေါ်ယူပေးမည့်စနစ် (Direct Call with Timeout)
+    setTimeout(() => {
+        initAutoNewFeed();
+    }, 150);
 });
