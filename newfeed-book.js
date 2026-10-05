@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const newFeedContainer = document.getElementById('newFeedContainer');
-    const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
 
     function loadScriptOnce(filePath) {
@@ -18,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateMinarNewFeed() {
+        const newFeedContainer = document.getElementById('newFeedContainer');
+        const newFeedLoading = document.getElementById('newFeedLoading');
+
         if (!newFeedContainer || !newFeedLoading) return;
 
         // Loading ကို အစပြုပြသမည်
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let allChunkPaths = [];
 
-            // မူရင်း ပုံစံအတိုင်း Root အားလုံးမှ Chunk လမ်းကြောင်းများကို အပြည့်အစုံ စုဆောင်းမည်
+            // Root အားလုံးမှ Chunk လမ်းကြောင်းများကို အပြည့်အစုံ စုဆောင်းမည်
             for (const root of rootIndices) {
                 await loadScriptOnce(root.file);
                 const suffix = root.file.split('/').pop().replace('.js', '').replace('book-index-', '');
@@ -94,17 +95,26 @@ document.addEventListener('DOMContentLoaded', () => {
             newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
         } finally {
             // Loading ကို ဖျောက်မည်
-            newFeedLoading.style.display = 'none';
+            if (newFeedLoading) {
+                newFeedLoading.style.display = 'none';
+            }
         }
     }
 
-    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် မူရင်းအတိုင်း အလုပ်လုပ်ရန်
+    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် အလုပ်လုပ်ရန်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
         });
     }
 
-    // ဝင်လာချင်း ချက်ချင်း အလိုအလျောက် ခေါ်ယူပေးမည့်စနစ်
-    generateMinarNewFeed();
+    // စာမျက်နှာ အပြည့်အစုံ ဝင်ရောက်လာသည်နှင့် ချက်ချင်း အလိုအလျောက် ခေါ်ယူပေးမည့်စနစ်
+    window.addEventListener('load', () => {
+        generateMinarNewFeed();
+    });
+
+    // အကယ်၍ load event ကျော်သွားပြီဆိုပါကပါ အလုပ်လုပ်စေရန်
+    if (document.readyState === 'complete') {
+        generateMinarNewFeed();
+    }
 });
