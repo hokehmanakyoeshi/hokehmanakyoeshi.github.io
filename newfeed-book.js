@@ -1,107 +1,109 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
 
-    function loadScriptOnce(filePath) {
-        return new Promise((resolve, reject) => {
+    function loadScriptSafely(filePath) {
+        return new Promise((resolve) => {
             if (document.querySelector(`script[src="${filePath}"]`)) {
-                resolve();
+                resolve(true);
                 return;
             }
             const script = document.createElement('script');
             script.src = filePath;
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error(`Failed to load script: ${filePath}`));
+            script.onload = () => resolve(true);
+            script.onerror = () => resolve(false);
             document.head.appendChild(script);
         });
     }
 
-    async function generateMinarNewFeed() {
+    async function initAutoNewFeed() {
         if (!newFeedContainer || !newFeedLoading) return;
 
-        // Loading ကို အစပြုပြသမည်
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
 
         try {
+            await loadScriptSafely('main-book-index.js');
+
             if (typeof getRootBookIndex !== 'function') {
-                await loadScriptOnce('main-book-index.js');
+                throw new Error("Root book index not found");
             }
 
             const rootIndices = getRootBookIndex();
             if (!rootIndices || rootIndices.length === 0) {
-                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">စာအုပ် အညွှန်းများ မတွေ့ရှိရပါ။</span>`;
+                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">စာအုပ် အညွှန်းများ မရှိပါ။</span>`;
+                newFeedLoading.style.display = 'flex';
                 return;
             }
 
-            let allChunkPaths = [];
+            const randomRoot = rootIndices[Math.floor(Math.random() * rootIndices.length)];
+            await loadScriptSafely(randomRoot.file);
 
-            for (const root of rootIndices) {
-                await loadScriptOnce(root.file);
-                const suffix = root.file.split('/').pop().replace('.js', '').replace('book-index-', '');
-                const indexFuncName = `getBookIndex_${suffix}`;
+            const suffix = randomRoot.file.split('/').pop().replace('.js', '').replace('book-index-', '');
+            const indexFuncName = `getBookIndex_${suffix}`;
 
-                if (typeof window[indexFuncName] === 'function') {
-                    const subEntries = window[indexFuncName]();
-                    subEntries.forEach(entry => {
-                        if (entry.chunk && !allChunkPaths.includes(entry.chunk)) {
-                            allChunkPaths.push(entry.chunk);
+            if (typeof window[indexFuncName] === 'function') {
+                const subEntries = window[indexFuncName]();
+                const validChunks = subEntries.filter(e => e.chunk);
+
+                if (validChunks.length > 0) {
+                    const randomEntry = validChunks[Math.floor(Math.random() * validChunks.length)];
+                    await loadScriptSafely(randomEntry.chunk);
+
+                    const chunkFileName = randomEntry.chunk.split('/').pop().replace('.js', '');
+                    const chunkKey = chunkFileName.replace('chunk-book-', '');
+                    const chunkFunctionName = `getChunkBook_${chunkKey}`;
+
+                    if (typeof window[chunkFunctionName] === 'function') {
+                        const chunkBooks = window[chunkFunctionName]();
+
+                        if (chunkBooks && chunkBooks.length > 0) {
+                            const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
+                            const selected = shuffled.slice(0, 5);
+
+                            let html = '';
+                            selected.forEach(book => {
+                                // main-book-app.js ထဲမှာ ရှိမည့် createBookCardHTML ကို လှမ်းသုံးသည်
+                                if (typeof createBookCardHTML === 'function') {
+                                    html += createBookCardHTML(book, false);
+                                }
+                            });
+
+                            newFeedContainer.innerHTML = html;
+                            newFeedContainer.style.display = 'block';
+                            newFeedLoading.style.display = 'none';
+                            return;
                         }
-                    });
+                    }
                 }
             }
+            
+            newFeedLoading.style.display = 'none';
+            newFeedContainer.style.display = 'block';
 
-            if (allChunkPaths.length === 0) {
-                newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">Chunk စာရင်းများ မရှိသေးပါ။</span>`;
-                return;
-            }
-
-            // Chunk ဖိုင်များထဲမှ တစ်ခုကို အမြဲတမ်း Random ရွေးမည်
-            const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
-            await loadScriptOnce(randomChunkPath);
-
-            const chunkFileName = randomChunkPath.split('/').pop().replace('.js', '');
-            const chunkKey = chunkFileName.replace('chunk-book-', '');
-            const chunkFunctionName = `getChunkBook_${chunkKey}`;
-
-            if (typeof window[chunkFunctionName] === 'function') {
-                const chunkBooks = window[chunkFunctionName]();
-
-                if (chunkBooks && chunkBooks.length > 0) {
-                    // ရလာသော Chunk ထဲက စာအုပ်များကို အမြဲတမ်း Random နှံ့စပ်အောင် ရောပြီး ၅ အုပ် ယူမည်
-                    const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
-                    const selectedFeedBooks = shuffledBooks.slice(0, 5);
-
-                    let feedHTML = '';
-                    selectedFeedBooks.forEach(book => {
-                        feedHTML += createBookCardHTML(book, false);
-                    });
-
-                    newFeedContainer.innerHTML = feedHTML;
-                    newFeedContainer.style.display = 'block';
-                } else {
-                    newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">ဤကဏ္ဍတွင် စာအုပ် မရှိသေးပါ။</span>`;
-                }
-            }
-
-        } catch (error) {
-            console.error("New Feed Loading Error:", error);
-            newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
-        } finally {
-            // Loading ကို ဖျောက်မည်
+        } catch (err) {
+            console.error("Auto New Feed Error:", err);
             newFeedLoading.style.display = 'none';
         }
     }
 
-    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် အလုပ်လုပ်ရန် Event Listener ချိတ်ခြင်း
+    // လဲလှယ်ရန် ခလုတ်အတွက် Event Listener
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
-            generateMinarNewFeed();
+            initAutoNewFeed();
         });
     }
 
-    // စာမျက်နှာ ဝင်လာသည်နှင့် နှိပ်စရာမလိုဘဲ New Feed ကို ချက်ချင်း အလိုအလျောက် တိုက်ရိုက်ထုတ်ပေးမည်
-    generateMinarNewFeed();
+    // စာမျက်နှာ ဝင်လာသည်နှင့် ၃၀၀ မီလီစက္ကန့်စောင့်ပြီး ခလုတ်ကို အလိုအလျောက် နှိပ်ခိုင်းခြင်း (Auto-Trigger)
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (refreshFeedBtn) {
+                refreshFeedBtn.click();
+            } else {
+                initAutoNewFeed();
+            }
+        }, 300);
+    });
 });
