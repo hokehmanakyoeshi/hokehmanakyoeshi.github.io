@@ -31,7 +31,7 @@ function isMatchWithNormalizedSequence(title, query) {
     return queryIdx === normQuery.length;
 }
 
-// Global Shared Card Template Function (Search နှင့် New Feed နှစ်ခုစလုံးအတွက် တစ်ခုတည်းကို မျှဝေသုံးသည်)
+// Global Shared Card Template Function (New Feed နှင့် Search နှစ်ခုစလုံးအတွက် မျှဝေသုံးသည်)
 function createBookCardHTML(book, isSelected = false) {
     const readersHTML = book.readers && book.readers.length > 0
         ? book.readers.map(r => `<li class="book-tag">👤 ${r.displayName} (@${r.username})</li>`).join('')
@@ -59,6 +59,7 @@ function createBookCardHTML(book, isSelected = false) {
     `;
 }
 
+// --- Search Logic ---
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const clearBtn = document.getElementById('clearBtn');
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadScript(filePath) {
+    async function loadScriptOnce(filePath) {
         return new Promise((resolve, reject) => {
             if (document.querySelector(`script[src="${filePath}"]`)) {
                 resolve();
@@ -103,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             if (typeof getRootBookIndex !== 'function') {
-                await loadScript('main-book-index.js');
+                await loadScriptOnce('main-book-index.js');
             }
 
             const rootIndices = getRootBookIndex();
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetRoot = rootIndices.find(r => r.key === firstChar);
 
             if (targetRoot) {
-                await loadScript(targetRoot.file);
+                await loadScriptOnce(targetRoot.file);
                 
                 const indexFileName = targetRoot.file.split('/').pop().replace('.js', '');
                 const suffix = indexFileName.replace('book-index-', '');
@@ -130,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         for (const entry of relevantEntries) {
                             if (!loadedChunksCache[entry.chunk]) {
-                                await loadScript(entry.chunk);
+                                await loadScriptOnce(entry.chunk);
                                 loadedChunksCache[entry.chunk] = true;
                             }
 
@@ -227,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const bookId = item.getAttribute('data-bookid');
                 
                 let selectedBook = null;
-                for (const chunkPath in loadedChunksCache) {
+                for (const chunkPath in loadedChunksCardCache || loadedChunksCache) {
                     const chunkFileName = chunkPath.split('/').pop().replace('.js', '');
                     const chunkKey = chunkFileName.replace('chunk-book-', '');
                     const chunkFunctionName = `getChunkBook_${chunkKey}`;
@@ -263,4 +264,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-    
