@@ -24,7 +24,7 @@
                     return true;
                 } catch (err) {
                     if (i === retries) throw err;
-                    await new Promise(resolve => setTimeout(resolve, 400));
+                    await new Promise(resolve => setTimeout(resolve, 300));
                 }
             }
         }
@@ -111,7 +111,8 @@
 
         // --- Event Listeners ---
         if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => initAutoNewFeed(1)); // ခလုတ်နှိပ်လျှင် တစ်ကြိမ်သာ သေချာဆွဲမည်
+            // ခလုတ်နှိပ်လျှင်လည်း ဝင်ဝင်ချင်းလိုမျိုး 3 ကြိမ်အထိ Self-Healing ဖြင့် သေချာဆွဲပေးမည်
+            refreshBtn.addEventListener('click', () => initAutoNewFeed(3));
         }
 
         // --- Initial Double Execution (Optimized Sequence) ---
