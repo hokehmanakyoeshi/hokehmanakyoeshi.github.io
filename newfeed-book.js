@@ -3,8 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
 
+    // Script များကို တစ်ကြိမ်တည်း သေချာဆွဲရန် Cache Map
+    const loadedScripts = {};
+    // ခလုတ်ကို ဆက်တိုက်နှိပ်ခြင်းမှ ကာကွယ်ရန် Lock Flag
+    let isGenerating = false;
+
     function loadScriptSafely(filePath) {
-        return new Promise((resolve) => {
+        if (loadedScripts[filePath]) {
+            return loadedScripts[filePath];
+        }
+
+        loadedScripts[filePath] = new Promise((resolve) => {
             if (document.querySelector(`script[src="${filePath}"]`)) {
                 resolve(true);
                 return;
@@ -12,14 +21,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const script = document.createElement('script');
             script.src = filePath;
             script.onload = () => resolve(true);
-            script.onerror = () => resolve(false);
+            script.onerror = () => {
+                delete loadedScripts[filePath]; // Error တက်ရင် ပြန်ဖျက်မည်
+                resolve(false);
+            };
             document.head.appendChild(script);
         });
+
+        return loadedScripts[filePath];
     }
 
     async function initAutoNewFeed() {
+        // အကယ်၍ အလုပ်လုပ်နေဆဲဆိုလျှင် နောက်ထပ်ထပ်မလုပ်ရန် တားဆီးမည် (Race Condition ကာကွယ်ရန်)
+        if (isGenerating) return;
         if (!newFeedContainer || !newFeedLoading) return;
 
+        isGenerating = true;
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
@@ -35,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!rootIndices || rootIndices.length === 0) {
                 newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">စာအုပ် အညွှန်းများ မရှိပါ။</span>`;
                 newFeedLoading.style.display = 'flex';
+                isGenerating = false;
                 return;
             }
 
@@ -65,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             let html = '';
                             selected.forEach(book => {
-                                // main-book-app.js ထဲမှာ ရှိမည့် createBookCardHTML ကို လှမ်းသုံးသည်
                                 if (typeof createBookCardHTML === 'function') {
                                     html += createBookCardHTML(book, false);
                                 }
@@ -74,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             newFeedContainer.innerHTML = html;
                             newFeedContainer.style.display = 'block';
                             newFeedLoading.style.display = 'none';
+                            isGenerating = false;
                             return;
                         }
                     }
@@ -86,6 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error("Auto New Feed Error:", err);
             newFeedLoading.style.display = 'none';
+        } finally {
+            isGenerating = false; // လုပ်ငန်းစဉ်ပြီးဆုံးသည်နှင့် Lock ပြန်ဖြုတ်မည်
         }
     }
 
@@ -96,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // စာမျက်နှာ ဝင်လာသည်နှင့် ၃၀၀ မီလီစက္ကန့်စောင့်ပြီး ခလုတ်ကို အလိုအလျောက် နှိပ်ခိုင်းခြင်း (Auto-Trigger)
+    // စာမျက်နှာ ဝင်လာသည်နှင့် အလိုအလျောက် ခေါ်ယူခြင်း
     window.addEventListener('load', () => {
         setTimeout(() => {
             if (refreshFeedBtn) {
