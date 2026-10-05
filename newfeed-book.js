@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => {
+(function () {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
@@ -20,12 +20,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function generateMinarNewFeed() {
         if (!newFeedContainer || !newFeedLoading) return;
 
-        // Loading ကို အစပြုပြသမည်
+        // ပထမဦးစွာ Loading Spinner ကို ပြသပြီး Container ကို ခေတ္တ ဖုံးထားမည်
         newFeedLoading.style.display = 'flex';
         newFeedContainer.style.display = 'none';
         newFeedContainer.innerHTML = '';
 
         try {
+            // main-book-index.js ရောက်ရှိနေခြင်း ရှိမစစ်ဆေးဘဲ Load လုပ်မည်
             if (typeof getRootBookIndex !== 'function') {
                 await loadScriptOnce('main-book-index.js');
             }
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Chunk ဖိုင်များထဲမှ တစ်ခုကို အမြဲတမ်း Random ရွေးမည်
+            // Chunk ဖိုင်များကို Random ရွေးချယ်မည်
             const randomChunkPath = allChunkPaths[Math.floor(Math.random() * allChunkPaths.length)];
             await loadScriptOnce(randomChunkPath);
 
@@ -70,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const chunkBooks = window[chunkFunctionName]();
 
                 if (chunkBooks && chunkBooks.length > 0) {
-                    // ရလာသော Chunk ထဲက စာအုပ်များကို အမြဲတမ်း Random နှံ့စပ်အောင် ရောပြီး ၅ အုပ် ယူမည်
+                    // ဒေတာများကို အမြဲတမ်း Random အနေဖြင့် ရောနှောပြသမည်
                     const shuffledBooks = [...chunkBooks].sort(() => 0.5 - Math.random());
                     const selectedFeedBooks = shuffledBooks.slice(0, 5);
 
@@ -90,18 +91,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.error("New Feed Loading Error:", error);
             newFeedLoading.innerHTML = `<span style="color:var(--subtext-color);">New Feed တင်ရာတွင် အမှားအယွင်းရှိပါသည်</span>`;
         } finally {
-            // Loading ကို ဖျောက်မည်
+            // လုပ်ဆောင်ချက်ပြီးဆုံးပါက Loading ကို ဖျောက်မည်
             newFeedLoading.style.display = 'none';
         }
     }
 
-    // စာမျက်နှာ စတင်ဝင်ရောက်လာသည်နှင့် တစ်ပြိုင်နက် New Feed ကို ချက်ချင်း အလိုအလျောက် ခေါ်ယူပြသမည်
-    generateMinarNewFeed();
+    // စာမျက်နှာ ဝင်လာသည်နှင့် (သို့မဟုတ်) DOMContentLoaded ပြီးသည်နှင့် ချက်ချင်း အလုပ်စလုပ်မည်
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', generateMinarNewFeed);
+    } else {
+        generateMinarNewFeed();
+    }
 
-    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်မှသာ အခြား Chunk တစ်ခုသို့ ပြောင်းလဲပြီး Random အသစ်ထပ်ပြမည်
+    // လဲလှယ်ရန် ခလုပ်နှိပ်လျှင် အသစ်တဖန် Random ဆွဲထုတ်ပေးရန်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
         });
     }
-});
+})();
