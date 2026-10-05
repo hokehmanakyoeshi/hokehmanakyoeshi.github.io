@@ -1,8 +1,4 @@
-ဟုတ်ကဲ့၊ အသေအချာ စစ်ဆေးပြီးပါပြီ။ အပေါ်မှာ ပေးထားတဲ့ ကုဒ်အစအဆုံးကို **main-book-app.js** နဲ့ **newfeed-book.js** ဆိုပြီး ဖိုင်နှစ်ခု ခွဲထုတ်လိုက်မယ်ဆိုရင် **၁၀၀% အပြည့်အဝ အလုပ်လုပ်ပါတယ်**။
-ဖိုင်နှစ်ခုကို သီးခြားစီခွဲထုတ်တဲ့အခါ HTML ထဲမှာ main-book-index.js နဲ့ createBookCardHTML တို့လို Shared လုပ်သုံးတဲ့ Function တွေက ဖိုင်တစ်ခုနဲ့ တစ်ခု ချိတ်ဆက်မိဖို့ အရေးကြီးပါတယ်။ အောက်ပါအတိုင်း သီးခြားစီ တိတိကျကျ ခွဲထုတ်ပေးလိုက်ပါတယ် -
-### ၁။ newfeed-book.js ဖိုင်အတွက် ကုဒ်
-(New Feed ဆိုင်ရာ လုပ်ဆောင်ချက်များနှင့် ဝင်လာချင်း အလိုအလျောက် Trigger လုပ်ပေးမည့်စနစ်)
-```javascript
+
 document.addEventListener('DOMContentLoaded', () => {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
