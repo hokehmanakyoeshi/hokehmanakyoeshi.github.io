@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const newFeedContainer = document.getElementById('newFeedContainer');
-    const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
 
     function loadScriptOnce(filePath) {
@@ -18,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function generateMinarNewFeed() {
+        const newFeedContainer = document.getElementById('newFeedContainer');
+        const newFeedLoading = document.getElementById('newFeedLoading');
+
         if (!newFeedContainer || !newFeedLoading) return;
 
         // Loading ကို အစပြုပြသမည်
@@ -107,14 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ဝင်ဝင်ချင်း လဲလှယ်ရန်ခလုတ်ကို အလိုအလျောက် နှိပ်ခိုင်းသည့် စနစ် (Auto-Trigger Click)
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (refreshFeedBtn) {
-                refreshFeedBtn.click();
-            } else {
-                generateMinarNewFeed();
-            }
-        }, 200);
-    });
+    // ဝင်ဝင်ချင်း အလိုအလျောက် အလုပ်လုပ်စေရန် DOMContentLoaded ထဲမှာ တိုက်ရိုက်ခေါ်ပေးခြင်း
+    // (Element တွေ အသင့်ဖြစ်ချိန်ကို စောင့်ရန် setTimeout ခဏခံသုံးထားပါသည်)
+    setTimeout(() => {
+        generateMinarNewFeed();
+    }, 100);
 });
