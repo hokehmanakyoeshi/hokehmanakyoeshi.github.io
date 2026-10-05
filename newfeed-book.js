@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     const newFeedContainer = document.getElementById('newFeedContainer');
     const newFeedLoading = document.getElementById('newFeedLoading');
     const refreshFeedBtn = document.getElementById('refreshFeedBtn');
@@ -95,19 +95,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်မှသာ အခြား Chunk တစ်ခုသို့ ပြောင်းလဲပြီး Random အသစ်ထပ်ပြမည်
+    // "လဲလှယ်ရန်" ခလုတ်ကို နှိပ်လျှင် အလုပ်လုပ်ရန်
     if (refreshFeedBtn) {
         refreshFeedBtn.addEventListener('click', () => {
             generateMinarNewFeed();
         });
     }
 
-    // စာမျက်နှာ စတင်ဝင်ရောက်လာသည်နှင့် ၃၀၀ မီလီစက္ကန့်စောင့်ပြီး လဲလှယ်ရန်ခလုတ်ကို အလိုအလျောက် နှိပ်ခိုင်းခြင်း (Auto-Trigger)
-    if (refreshFeedBtn) {
-        setTimeout(() => {
-            refreshFeedBtn.click();
-        }, 300);
-    } else {
-        generateMinarNewFeed();
-    }
+    // ဝင်လာချင်း Function ကို တိုက်ရိုက် ချက်ချင်း ခေါ်ယူခြင်း (အသေချာဆုံးနှင့် အမြန်ဆုံး နည်းလမ်း)
+    generateMinarNewFeed();
 });
