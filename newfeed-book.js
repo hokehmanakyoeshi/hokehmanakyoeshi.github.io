@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         if (chunkBooks && chunkBooks.length > 0) {
                             const shuffled = [...chunkBooks].sort(() => 0.5 - Math.random());
-                            const selected = shuffled.slice(0, 5);
+                            const selected = shuffled;
 
                             let html = '';
                             selected.forEach(book => {
