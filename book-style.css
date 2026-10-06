@@ -101,7 +101,7 @@ body.reading-mode .brand-title {
     border: 1.5px solid var(--border-color);
     border-radius: 12px;
     /*padding: 0.5rem 0.75rem;*/
-    padding: 1rem 0.75rem;
+    padding: 0.85rem 0.75rem;
     transition: var(--transition);
 }
 
@@ -122,7 +122,7 @@ body.reading-mode .brand-title {
     flex: 1;
     border: none;
     height: auto;
-    line-height: 1.5;
+    line-height: 1.6;
     background: transparent;
     font-size: 0.92rem;
     outline: none;
