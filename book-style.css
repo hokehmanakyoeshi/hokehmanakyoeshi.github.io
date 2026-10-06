@@ -100,7 +100,8 @@ body.reading-mode .brand-title {
     background-color: var(--bg-color);
     border: 1.5px solid var(--border-color);
     border-radius: 12px;
-    padding: 0.5rem 0.75rem;
+    /*padding: 0.5rem 0.75rem;*/
+    padding: 1rem 0.75rem;
     transition: var(--transition);
 }
 
