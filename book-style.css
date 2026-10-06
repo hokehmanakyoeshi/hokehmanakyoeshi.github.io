@@ -97,8 +97,6 @@ body.reading-mode .brand-title {
 .search-input-container {
     display: flex;
     align-items: center;
-    height: auto;
-    line-height: 1.5;
     background-color: var(--bg-color);
     border: 1.5px solid var(--border-color);
     border-radius: 12px;
@@ -123,6 +121,8 @@ body.reading-mode .brand-title {
 .search-input-container input {
     flex: 1;
     border: none;
+    height: auto;
+    line-height: 1.5;
     background: transparent;
     font-size: 0.92rem;
     outline: none;
